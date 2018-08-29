@@ -70,6 +70,7 @@ add_library(
   XrdClLocalFileHandler.cc    XrdClLocalFileHandler.hh
   XrdClLocalFileTask.cc       XrdClLocalFileTask.hh
   XrdClZipListHandler.cc      XrdClZipListHandler.hh
+  XrdClOperations.cc          XrdClOperations.hh
 )
 
 target_link_libraries(
@@ -145,6 +146,8 @@ install(
     XrdClPropertyList.hh
     XrdClFileSystemUtils.hh
     XrdClLog.hh
+    XrdClOperations.hh
+    XrdClOperationParams.hh
   DESTINATION    ${CMAKE_INSTALL_INCLUDEDIR}/xrootd/XrdCl )
 
 install(
