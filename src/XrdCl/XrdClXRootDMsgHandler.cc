@@ -662,7 +662,7 @@ namespace XrdCl
 
         if( resendTime < pExpiration )
         {
-          log->Debug( XRootDMsg, "[%s] Scheduling WaitTask for MsgHandler: %x (message: %s ).",
+          log->Error( XRootDMsg, "[%s] Scheduling WaitTask for MsgHandler: %x (message: %s ).",
                       pUrl.GetHostId().c_str(), this,
                       pRequest->GetDescription().c_str() );
 
@@ -1076,7 +1076,7 @@ namespace XrdCl
       log->Dump( XRootDMsg, "[%s] Message %s has been successfully sent.",
                  pUrl.GetHostId().c_str(), message->GetDescription().c_str() );
 
-      log->Debug( XRootDMsg, "[%s] Moving MsgHandler: %x (message: %s ) from out-queu to in-queue.",
+      log->Error( XRootDMsg, "[%s] Moving MsgHandler: %x (message: %s ) from out-queu to in-queue.",
                   pUrl.GetHostId().c_str(), this,
                   pRequest->GetDescription().c_str() );
 
@@ -1145,7 +1145,7 @@ namespace XrdCl
     AnyObject    *response = 0;
 
     Log *log = DefaultEnv::GetLog();
-    log->Debug( XRootDMsg, "[%s] Calling MsgHandler: %x (message: %s ) "
+    log->Error( XRootDMsg, "[%s] Calling MsgHandler: %x (message: %s ) "
                 "with status: %s.",
                 pUrl.GetHostId().c_str(), this,
                 pRequest->GetDescription().c_str(),
@@ -1997,7 +1997,7 @@ namespace XrdCl
 
     if( pUrl.IsMetalink() && pFollowMetalink )
     {
-      log->Debug( XRootDMsg, "[%s] Metaling redirection for MsgHandler: %x (message: %s ).",
+      log->Error( XRootDMsg, "[%s] Metaling redirection for MsgHandler: %x (message: %s ).",
                   pUrl.GetHostId().c_str(), this,
                   pRequest->GetDescription().c_str() );
 
@@ -2010,7 +2010,7 @@ namespace XrdCl
     }
     else
     {
-      log->Debug( XRootDMsg, "[%s] Retry at server MsgHandler: %x (message: %s ).",
+      log->Error( XRootDMsg, "[%s] Retry at server MsgHandler: %x (message: %s ).",
                   pUrl.GetHostId().c_str(), this,
                   pRequest->GetDescription().c_str() );
       return pPostMaster->Send( pUrl, pRequest, this, true, pExpiration );
@@ -2097,7 +2097,7 @@ namespace XrdCl
     else
     {
       Log *log = DefaultEnv::GetLog();
-      log->Debug( XRootDMsg, "[%s] Passing to the thread-pool MsgHandler: %x (message: %s ).",
+      log->Error( XRootDMsg, "[%s] Passing to the thread-pool MsgHandler: %x (message: %s ).",
                   pUrl.GetHostId().c_str(), this,
                   pRequest->GetDescription().c_str() );
       jobMgr->QueueJob( new HandleRspJob( this ), 0 );
@@ -2110,7 +2110,7 @@ namespace XrdCl
   void XRootDMsgHandler::HandleLocalRedirect( URL *url )
   {
     Log *log = DefaultEnv::GetLog();
-    log->Debug( XRootDMsg, "[%s] Handling local redirect - MsgHandler: %x (message: %s ).",
+    log->Error( XRootDMsg, "[%s] Handling local redirect - MsgHandler: %x (message: %s ).",
                 pUrl.GetHostId().c_str(), this,
                 pRequest->GetDescription().c_str() );
 

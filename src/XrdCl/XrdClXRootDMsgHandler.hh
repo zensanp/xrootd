@@ -144,7 +144,7 @@ namespace XrdCl
         memset( &pReadVRawChunkHeader, 0, sizeof( readahead_list ) );
 
         Log *log = DefaultEnv::GetLog();
-        log->Debug( XRootDMsg, "[%s] MsgHandler created: %x (message: %s ).",
+        log->Error( XRootDMsg, "[%s] MsgHandler created: %x (message: %s ).",
                     pUrl.GetHostId().c_str(), this,
                     pRequest->GetDescription().c_str() );
       }
@@ -173,9 +173,8 @@ namespace XrdCl
         pChunkList       = reinterpret_cast<ChunkList*>( 0xDEADBEEF );
 
         Log *log = DefaultEnv::GetLog();
-        log->Debug( XRootDMsg, "[%s] Destroying MsgHandler: %x (message: %s ).",
-                    pUrl.GetHostId().c_str(), this,
-                    pRequest->GetDescription().c_str() );
+        log->Error( XRootDMsg, "[%s] Destroying MsgHandler: %x.",
+                    pUrl.GetHostId().c_str(), this );
       }
 
       //------------------------------------------------------------------------
