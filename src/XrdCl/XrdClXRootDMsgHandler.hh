@@ -272,7 +272,6 @@ namespace XrdCl
       //! @param status    status info
       //------------------------------------------------------------------------
       virtual uint8_t OnStreamEvent( StreamEvent event,
-                                     uint16_t    streamNum,
                                      Status      status );
 
       //------------------------------------------------------------------------

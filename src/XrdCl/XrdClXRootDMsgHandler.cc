@@ -778,7 +778,6 @@ namespace XrdCl
   // Handle an event other that a message arrival - may be timeout
   //----------------------------------------------------------------------------
   uint8_t XRootDMsgHandler::OnStreamEvent( StreamEvent event,
-                                           uint16_t    streamNum,
                                            Status      status )
   {
     Log *log = DefaultEnv::GetLog();
@@ -786,9 +785,6 @@ namespace XrdCl
                pUrl.GetHostId().c_str(), pRequest->GetDescription().c_str() );
 
     if( event == Ready )
-      return 0;
-
-    if( streamNum != 0 )
       return 0;
 
     HandleError( status, 0 );
