@@ -79,7 +79,6 @@ namespace
       // Handle a fault
       //------------------------------------------------------------------------
       virtual uint8_t OnStreamEvent( StreamEvent   event,
-                                     uint16_t      streamNum,
                                      XrdCl::Status status )
       {
         if( event == Ready )
