@@ -140,6 +140,7 @@ namespace XrdCl
         pNotAuthorizedCounter( 0 ),
 
         pAsyncOffset( 0 ),
+        pAsyncChunkIndex( 0 ),
         pAsyncReadSize( 0 ),
         pAsyncReadBuffer( 0 ),
         pAsyncMsgSize( 0 ),
@@ -296,20 +297,8 @@ namespace XrdCl
       //!                  stOK & suRetry if more data needs to be written
       //!                  stError on failure
       //------------------------------------------------------------------------
-      Status WriteMessageBody( int       socket,
-                               uint32_t &bytesRead );
-
-      //------------------------------------------------------------------------
-      //! Get message body - called if IsRaw returns true
-      //!
-      //! @param asyncOffset  :  the current async offset
-      //! @return             :  the list of chunks
-      //------------------------------------------------------------------------
-      virtual ChunkList* GetMessageBody( uint32_t *&asyncOffset )
-      {
-        asyncOffset = &pAsyncOffset;
-        return pChunkList;
-      }
+      Status WriteMessageBody( Socket   *socket,
+                               uint32_t &bytesWritten );
 
       //------------------------------------------------------------------------
       //! Called after the wait time for kXR_wait has elapsed
@@ -618,6 +607,7 @@ namespace XrdCl
       uint16_t                        pNotAuthorizedCounter;
 
       uint32_t                        pAsyncOffset;
+      uint32_t                        pAsyncChunkIndex;
       uint32_t                        pAsyncReadSize;
       char*                           pAsyncReadBuffer;
       uint32_t                        pAsyncMsgSize;
