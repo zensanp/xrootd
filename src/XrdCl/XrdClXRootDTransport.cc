@@ -805,6 +805,9 @@ namespace XrdCl
       if( ret == 1 ) ++ret;
     }
 
+    if( ret > info->stream.size() )
+      info->stream.resize( ret );
+
     return ret;
   }
 
