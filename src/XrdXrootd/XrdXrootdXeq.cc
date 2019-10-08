@@ -1000,6 +1000,7 @@ int XrdXrootdProtocol::do_Login()
                     (clientPV & XrdOucEI::uIPv4 ? '4' : '6'));
            Entity.moninfo = strdup(apBuff);
           }
+       if (appXQ) AppName = strdup(appXQ);
       }
 
 // Allocate a monitoring object, if needed for this connection
@@ -3664,6 +3665,14 @@ bool XrdXrootdProtocol::logLogin(bool xauth)
       {eDest.Emsg("Xeq", "Unable to require TLS for", Link->ID);
        return false;
       }
+
+// Record the appname in the final SecEntity object
+//
+   if (AppName) Client->Add("xrd.appname", (std::string)AppName, true);
+
+// Assign unique identifier to the final SecEntity object
+//
+   Client->entityID = mySID;
    return true;
 }
 
