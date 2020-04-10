@@ -325,19 +325,19 @@ int XrdXrootdResponse::Send(XrdXrootdReqID &ReqID,
                             int             iornum, 
                             int             iolen)
 {
-   static const kXR_unt16 Xattn = static_cast<kXR_unt16>(htons(kXR_attn));
-   static const kXR_int32 Xarsp = static_cast<kXR_int32>(htonl(kXR_asynresp));
+// static const kXR_unt16 Xattn = static_cast<kXR_unt16>(htons(kXR_attn));
+// static const kXR_int32 Xarsp = static_cast<kXR_int32>(htonl(kXR_asynresp));
 
 // We would have used struct ServerResponseBody_Attn_asynresp but the silly
 // imbedded 4096 char array causes grief when computing lengths.
 //
-   struct {ServerResponseHeader atnHdr;
-           kXR_int32            act;
-           kXR_int32            rsvd;  // Same as char[4]
-           ServerResponseHeader theHdr;
+// struct {ServerResponseHeader atnHdr;
+//         kXR_int32            act;
+//         kXR_int32            rsvd;  // Same as char[4]
+   struct {ServerResponseHeader theHdr;
           } asynResp;
 
-   static const int sfxLen = sizeof(asynResp) - sizeof(asynResp.atnHdr);
+// static const int sfxLen = sizeof(asynResp) - sizeof(asynResp.atnHdr);
 
    XrdLink           *Link;
    unsigned char      theSID[2];
@@ -346,11 +346,11 @@ int XrdXrootdResponse::Send(XrdXrootdReqID &ReqID,
 
 // Fill out the header with constant information
 //
-   asynResp.atnHdr.streamid[0] = '\0';
-   asynResp.atnHdr.streamid[1] = '\0';
-   asynResp.atnHdr.status      = Xattn;
-   asynResp.act                = Xarsp;
-   asynResp.rsvd               = 0;
+// asynResp.atnHdr.streamid[0] = '\0';
+// asynResp.atnHdr.streamid[1] = '\0';
+// asynResp.atnHdr.status      = Xattn;
+// asynResp.act                = Xarsp;
+// asynResp.rsvd               = 0;
 
 // Complete the io vector to send this response
 //
@@ -364,8 +364,8 @@ int XrdXrootdResponse::Send(XrdXrootdReqID &ReqID,
 // We now insert the length of the delayed response and the full response
 //
    asynResp.theHdr.dlen = static_cast<kXR_int32>(htonl(iolen));
-   iolen += sfxLen;
-   asynResp.atnHdr.dlen = static_cast<kXR_int32>(htonl(iolen));
+// iolen += sfxLen;
+// asynResp.atnHdr.dlen = static_cast<kXR_int32>(htonl(iolen));
    iolen += sizeof(ServerResponseHeader);
 
 // Decode the destination
