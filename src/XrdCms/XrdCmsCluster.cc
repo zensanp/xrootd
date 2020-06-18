@@ -1558,7 +1558,15 @@ int XrdCmsCluster::SelNode(XrdCmsSelect &Sel, SMask_t pmask, SMask_t amask)
 
 // Indicate whether or not stable selection is required
 //
-   selR.selPack = (Sel.Opts & XrdCmsSelect::Pack) != 0;
+   if (!(Sel.Opts & XrdCmsSelect::Pack)) selR.selPack = 0;
+      else {SMask_t sVec = pmask;
+            int count;
+            for (count = 0; sVec; count++) sVec &= (sVec - 1);
+            if (count) selR.selPack = (Sel.Path.Hash % count) + 1;
+               else    selR.selPack = 0;
+            TRACE(Redirect, "affinity " <<(int)selR.selPack <<" of " <<count
+                            <<" for " <<Sel.Path.Val);
+           }
 
 // There is a difference bwteen needing space and needing r/w access. The former
 // is needed when we will be writing data the latter for inode modifications.
@@ -1704,9 +1712,12 @@ XrdCmsNode *XrdCmsCluster::SelbyCost(SMask_t mask, XrdCmsSelector &selR)
            if (np->isBad)                        {selR.xSusp = true; continue;}
            if (selR.needSpace && np->isNoStage)  {selR.xFull = true; continue;}
            if (!sp) sp = np;
-              else{if (abs(sp->myCost - np->myCost) <= Config.P_fuzz)
+              else{Multi = true;
+                   if (abs(sp->myCost - np->myCost) <= Config.P_fuzz)
                       {     if (selR.selPack)
-                               {if (sp->Inst() > np->Inst()) sp=np;}
+                               {if (--selR.selPack) sp=np;
+                                   else break;
+                               }
                        else if (selR.needSpace)
                                {if (sp->RefW > (np->RefW+Config.DiskLinger))
                                    sp=np;
@@ -1714,7 +1725,6 @@ XrdCmsNode *XrdCmsCluster::SelbyCost(SMask_t mask, XrdCmsSelector &selR)
                        else if (sp->RefR > np->RefR) sp=np;
                       }
                        else if (sp->myCost > np->myCost) sp=np;
-                   Multi = true;
                   }
           }
 
@@ -1750,10 +1760,13 @@ XrdCmsNode *XrdCmsCluster::SelbyLoad(SMask_t mask, XrdCmsSelector &selR)
                                   || (reqSS && np->isNoStage)))
               {selR.xFull = true; continue;}
            if (!sp) sp = np;
-              else{if (selR.needSpace)
+              else{Multi = true;
+                   if (selR.needSpace)
                       {if (abs(sp->myMass - np->myMass) <= Config.P_fuzz)
                           {if (selR.selPack)
-                              {if (sp->Inst() > np->Inst())             sp=np;}
+                              {if (--selR.selPack)                      sp=np;
+                                  else break;
+                              }
                            else
                            if (sp->RefW > (np->RefW+Config.DiskLinger)) sp=np;
                           }
@@ -1761,12 +1774,13 @@ XrdCmsNode *XrdCmsCluster::SelbyLoad(SMask_t mask, XrdCmsSelector &selR)
                       } else {
                        if (abs(sp->myLoad - np->myLoad) <= Config.P_fuzz)
                           {if (selR.selPack)
-                              {if (sp->Inst() > np->Inst())             sp=np;}
+                              {if (--selR.selPack)                      sp=np;
+                                  else break;
+                              }
                               else if (sp->RefR > np->RefR)             sp=np;
                           }
                           else if (sp->myLoad > np->myLoad)             sp=np;
                       }
-                   Multi = true;
                   }
           }
 
@@ -1802,7 +1816,10 @@ XrdCmsNode *XrdCmsCluster::SelbyRef(SMask_t mask, XrdCmsSelector &selR)
               {selR.xFull = true; continue;}
            if (!sp) sp = np;
               else {Multi = true;
-                         if (selR.selPack) {if (sp->Inst() > np->Inst())sp=np;}
+                         if (selR.selPack)
+                            {if (--selR.selPack) sp=np;
+                                else break;
+                            }
                     else if (selR.needSpace)
                             {if (sp->RefW > (np->RefW+Config.DiskLinger)) sp=np;}
                     else if (sp->RefR > np->RefR)                         sp=np;
