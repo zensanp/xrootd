@@ -263,11 +263,15 @@ void XrdSsiClientProvider::SetScheduler()
 /*       X r d S s i C l i e n t P r o v i d e r : : S e t S p r e a d        */
 /******************************************************************************/
 
-void XrdSsiClientProvider::SetSpread(short ssz)
+namespace XrdSsi
 {
     extern XrdSsiScale sidScale;
+}
 
-    sidScale.setSpread(ssz);
+void XrdSsiClientProvider::SetSpread(short ssz)
+{
+
+    XrdSsi::sidScale.setSpread(ssz);
 }
 
 /******************************************************************************/
