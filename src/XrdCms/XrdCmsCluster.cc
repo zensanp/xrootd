@@ -1592,6 +1592,15 @@ int XrdCmsCluster::SelNode(XrdCmsSelect &Sel, SMask_t pmask, SMask_t amask)
          if (!(Sel.Opts & XrdCmsSelect::isMeta)) selR.needSpace |= isalt;
         }
 
+// Produce affinity result trace
+//
+   if (Sel.Opts & XrdCmsSelect::Pack)
+      {const char *nn = (nP ? nP->Name() : "failed");
+       const char *rs = (selR.selPack ? " poor " : " ideal ");
+       TRACE(Redirect, "affinity " <<nn <<rs <<(int)selR.selPack
+                       <<" for " <<Sel.Path.Val);
+      }
+
 // If we found an eligible node then dispatch the client to it. We will
 // swap the global mutex for the node mutex to minimize interefrence.
 //
