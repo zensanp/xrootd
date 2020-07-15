@@ -38,49 +38,37 @@ class XrdSsiScale
 public:
 
 static const int          maxSprd =  1024;
-static const int          maxEnt  =    32;       // Must be power of two
-static const int          entShft =    10;       // Allows a spread of 1024
 static const unsigned int maxPend = 65500;
 
 int   getEnt() {entMutex.Lock();
-                if (pendCnt[nowEnt] < maxPend) 
-                   {pendCnt[nowEnt]++;
-                    if (maxSpread) return Spread(nowEnt);
-                    entMutex.UnLock();
-                    return nowEnt << entShft;
-                   }
-                int xEnt = (nowEnt < maxEnt ? nowEnt+1 : 0);
-                int zEnt = maxEnt;
-                do {for (int i = xEnt; i < zEnt; i++)
+                int entEnd = maxSpread;
+                do {for (int i = nowEnt; i < entEnd; i++)
                         {if (pendCnt[i] < maxPend)
                             {pendCnt[i]++;
-                             nowEnt = i;
-                             if (maxSpread) return Spread(i);
+                             nowEnt = i+1;
                              entMutex.UnLock();
                              return i;
-
                             }
                         }
-                    if (!xEnt) break;
-                    xEnt = 0; zEnt = nowEnt;
+                    if (!nowEnt) break;
+                    entEnd = nowEnt;
+                    nowEnt = 0;
                    } while(true);
                  entMutex.UnLock();
                  return -1;
                 }
 
-void  retEnt(int xEnt) {xEnt >>= entShft;
-                        if (xEnt >= 0 && xEnt < maxEnt)
+void  retEnt(int xEnt) {if (xEnt >= 0 && xEnt < maxSprd)
                            {entMutex.Lock();
                             if (pendCnt[xEnt]) pendCnt[xEnt]--;
                             entMutex.UnLock();
                            }
                        }
 
-bool  rsvEnt(int xEnt) {xEnt >>= entShft;
-                        if (xEnt < 0 && xEnt >= maxEnt) return false;
+bool  rsvEnt(int xEnt) {if (xEnt < 0 || xEnt >= maxSprd) return false;
                         entMutex.Lock();
-                        if (pendCnt[nowEnt] < maxPend)
-                           {pendCnt[nowEnt]++;
+                        if (pendCnt[xEnt] < maxPend)
+                           {pendCnt[xEnt]++;
                             entMutex.UnLock();
                             return true;
                            }
@@ -89,31 +77,22 @@ bool  rsvEnt(int xEnt) {xEnt >>= entShft;
                        }
 
 void  setSpread(short sval) {entMutex.Lock();
-                             if (sval <= 0) maxSpread = 0;
+                             if (sval <= 0) maxSpread = 1;
                                 else if (sval < maxSprd) maxSpread = sval;
                                         else maxSpread = maxSprd;
                              entMutex.UnLock();
                             }
 
-      XrdSsiScale() : nowEnt(0), maxSpread(4), nowSpread(0)
-                      {memset(pendCnt, 0, sizeof(uint16_t)*maxEnt);}
+      XrdSsiScale() : nowEnt(0), maxSpread(4)
+                      {memset(pendCnt, 0, sizeof(uint16_t)*maxSprd);}
 
      ~XrdSsiScale() {}
 
 private:
 
-int   Spread(int ent) // Called with entMutex locked and return unlocked.
-            {int n = nowSpread;
-             nowSpread++;
-             if (nowSpread >= maxSpread) nowSpread = 0;
-             entMutex.UnLock();
-             return (ent << entShft) | n;
-            }
-
 XrdSysMutex entMutex;
-uint16_t    pendCnt[maxEnt];
 int         nowEnt;
-short       maxSpread;
-short       nowSpread;
+int         maxSpread;
+uint16_t    pendCnt[maxSprd];
 };
 #endif
