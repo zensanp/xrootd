@@ -29,6 +29,7 @@
 /* specific prior written permission of the institution or contributor.       */
 /******************************************************************************/
 
+#include <cstdint>
 #include <string.h>
 
 #include "XrdSys/XrdSysPthread.hh"
@@ -37,62 +38,41 @@ class XrdSsiScale
 {
 public:
 
-static const int          maxSprd =  1024;
-static const unsigned int maxPend = 65500;
+static const uint16_t defSprd =     4; // Initial spread
+static const uint16_t maxSprd =  1024; // Maximum spread
+static const uint16_t maxPend = 64000; // Maximum pending requests
+static const uint16_t minTune =     3; // Minimum remaining channels to tune
+static const uint16_t midTune =    64; // Quadratic tuning limit
+static const uint16_t maxTune =   128; // Maximum   linear increase
+static const uint16_t zipTune =   512; // Channel count when maxTune applies
 
-int   getEnt() {entMutex.Lock();
-                int entEnd = maxSpread;
-                do {for (int i = nowEnt; i < entEnd; i++)
-                        {if (pendCnt[i] < maxPend)
-                            {pendCnt[i]++;
-                             nowEnt = i+1;
-                             entMutex.UnLock();
-                             return i;
-                            }
-                        }
-                    if (!nowEnt) break;
-                    entEnd = nowEnt;
-                    nowEnt = 0;
-                   } while(true);
-                 entMutex.UnLock();
-                 return -1;
-                }
+int   getEnt();
 
-void  retEnt(int xEnt) {if (xEnt >= 0 && xEnt < maxSprd)
-                           {entMutex.Lock();
-                            if (pendCnt[xEnt]) pendCnt[xEnt]--;
-                            entMutex.UnLock();
-                           }
-                       }
+void  retEnt(int xEnt);
 
-bool  rsvEnt(int xEnt) {if (xEnt < 0 || xEnt >= maxSprd) return false;
-                        entMutex.Lock();
-                        if (pendCnt[xEnt] < maxPend)
-                           {pendCnt[xEnt]++;
-                            entMutex.UnLock();
-                            return true;
-                           }
-                        entMutex.UnLock();
-                        return false;
-                       }
+bool  rsvEnt(int xEnt);
 
-void  setSpread(short sval) {entMutex.Lock();
-                             if (sval <= 0) maxSpread = 1;
-                                else if (sval < maxSprd) maxSpread = sval;
-                                        else maxSpread = maxSprd;
-                             entMutex.UnLock();
-                            }
+void  setSpread(short sval);
 
-      XrdSsiScale() : nowEnt(0), maxSpread(4)
+      XrdSsiScale() : Active(0), reActive(0), begEnt(0), nowEnt(0),
+                      curSpread(defSprd), autoTune(false), needTune(false)
                       {memset(pendCnt, 0, sizeof(uint16_t)*maxSprd);}
 
      ~XrdSsiScale() {}
 
 private:
 
+void        Retune();
+bool        Tune(char *buff, int blen);
+
 XrdSysMutex entMutex;
-int         nowEnt;
-int         maxSpread;
+uint32_t    Active;
+uint32_t    reActive;
+uint16_t    begEnt;
+uint16_t    nowEnt;
+uint16_t    curSpread;
+bool        autoTune;
+bool        needTune;
 uint16_t    pendCnt[maxSprd];
 };
 #endif
