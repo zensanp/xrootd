@@ -500,7 +500,6 @@ void XrdSsiFileReq::Finalize()
                          Stats.Bump(Stats.ReqFinished);
                          if (cancel) Stats.Bump(Stats.ReqCancels);
                          Finished(cancel); // This object may be deleted!
-                         sessN   = "n/a";
                          return;
                          break;
 
