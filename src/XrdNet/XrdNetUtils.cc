@@ -178,7 +178,7 @@ struct hpSpec
               hpSpec(XrdNetUtils::AddrOpts opts)
                     : aiP4(0), aNum4(0), aNum6(0), aiP6(0), map426(false),
                       noOrder((opts & OrderXX) == 0),
-                      order46((opts & order46) != 0),
+                      order46((opts & XrdNetUtils::order46) != 0),
                       onlyUDP((opts & XrdNetUtils::onlyUDP) != 0) {}
 
              ~hpSpec() {if (aiP4) freeaddrinfo(aiP4);
