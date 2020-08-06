@@ -171,7 +171,7 @@ XrdSsiService *XrdSsiClientProvider::GetService(XrdSsiErrInfo     &eInfo,
 //
    if (!(n = XrdNetRegistry::Register(buff, contact.c_str(), &eMsg)))
       {eInfo.Set(eMsg, EINVAL);
-       return false;
+       return 0;
       }
 
 // Allocate a service object and return it
