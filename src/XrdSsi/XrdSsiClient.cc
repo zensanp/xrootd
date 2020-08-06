@@ -41,7 +41,7 @@
 
 #include "XrdCl/XrdClDefaultEnv.hh"
 
-#include "XrdNet/XrdNetAddr.hh"
+#include "XrdNet/XrdNetRegistry.hh"
 
 #include "XrdSsi/XrdSsiAtomics.hh"
 #include "XrdSsi/XrdSsiLogger.hh"
@@ -71,6 +71,7 @@ extern XrdSsiLogger::MCB_t *msgCBCl;
        XrdSysMutex   clMutex;
        XrdScheduler *schedP   = 0;
        XrdCl::Env   *clEnvP   = 0;
+       int           contactN = 1;
        short         maxTCB   = 300;
        short         maxCLW   =  30;
        Atomic(bool)  initDone(false);
@@ -123,14 +124,23 @@ void SetScheduler();
 /******************************************************************************/
 /*      X r d S s i C l i e n t P r o v i d e r : : G e t S e r v i c e       */
 /******************************************************************************/
+
+namespace
+{
+void genAlias(char *buff, int bsz)
+{
+   int cNum;
+   clMutex.Lock(); cNum = contactN++; clMutex.UnLock();
+   snprintf(buff, bsz, "%ccontact-%d:4901", XrdNetRegistry::pfx, cNum);
+}
+}
   
 XrdSsiService *XrdSsiClientProvider::GetService(XrdSsiErrInfo     &eInfo,
                                                 const std::string &contact,
                                                 int                oHold)
 {
    static const int maxTMO = 0x7fffffff;
-   XrdNetAddr netAddr;
-   const char *eText;
+   std::string eMsg;
    char buff[512];
    int  n;
 
@@ -153,15 +163,16 @@ XrdSsiService *XrdSsiClientProvider::GetService(XrdSsiErrInfo     &eInfo,
    if (contact.empty())
       {eInfo.Set("Contact not specified.", EINVAL); return 0;}
 
-// Validate the given contact
+// Generate a unique handle for this combination of hosts
 //
-   if ((eText = netAddr.Set(contact.c_str())))
-      {eInfo.Set(eText, EINVAL); return 0;}
+   genAlias(buff, sizeof(buff));
 
-// Construct new binding
+// Register this contact
 //
-   if (!(n = netAddr.Format(buff, sizeof(buff), XrdNetAddrInfo::fmtName)))
-      {eInfo.Set("Unable to validate contact.", EINVAL); return 0;}
+   if (!(n = XrdNetRegistry::Register(buff, contact.c_str(), &eMsg)))
+      {eInfo.Set(eMsg, EINVAL);
+       return false;
+      }
 
 // Allocate a service object and return it
 //

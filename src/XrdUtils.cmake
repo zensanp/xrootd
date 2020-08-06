@@ -27,6 +27,7 @@ add_library(
                                 XrdSys/XrdSysAtomics.hh
   XrdSys/XrdSysDNS.cc           XrdSys/XrdSysDNS.hh
   XrdSys/XrdSysDir.cc           XrdSys/XrdSysDir.hh
+  XrdSys/XrdSysE2T.cc           XrdSys/XrdSysE2T.hh
   XrdSys/XrdSysError.cc         XrdSys/XrdSysError.hh
   XrdSys/XrdSysFAttr.cc         XrdSys/XrdSysFAttr.hh
                                 XrdSys/XrdSysFAttrBsd.icc
@@ -133,6 +134,7 @@ add_library(
   XrdNet/XrdNetConnect.cc       XrdNet/XrdNetConnect.hh
   XrdNet/XrdNetIF.cc            XrdNet/XrdNetIF.hh
   XrdNet/XrdNetMsg.cc           XrdNet/XrdNetMsg.hh
+  XrdNet/XrdNetRegistry.cc      XrdNet/XrdNetRegistry.hh
   XrdNet/XrdNetSecurity.cc      XrdNet/XrdNetSecurity.hh
   XrdNet/XrdNetSocket.cc        XrdNet/XrdNetSocket.hh
   XrdNet/XrdNetUtils.cc         XrdNet/XrdNetUtils.hh

@@ -131,9 +131,8 @@ namespace XrdCl
                                   Utils::AddressType      type )
   {
     Log *log = DefaultEnv::GetLog();
-    XrdNetAddr *addrs;
-    int         nAddrs = 0;
     const char *err    = 0;
+    int ordn;
 
     //--------------------------------------------------------------------------
     // Resolve all the addresses
@@ -147,7 +146,17 @@ namespace XrdCl
     else if( type == IPAll ) opts = XrdNetUtils::allIPMap;
     else opts = XrdNetUtils::prefAuto;
 
-    err = XrdNetUtils::GetAddrs( o.str().c_str(), &addrs, nAddrs, opts );
+    //--------------------------------------------------------------------------
+    // Partition the addresses according to the preferences (IPv6 or IPv4)
+    //
+    // The preferred IP family goes to the back as it is easier to remove
+    // items from the back of the vector
+    //--------------------------------------------------------------------------
+    int preferIPv4 = DefaultPreferIPv4;
+    DefaultEnv::GetEnv()->GetInt( "PreferIPv4", preferIPv4 );
+    opts |= (preferIPv4 ? XrdNetUtils::order64 : XrdNetUtils::order46);
+
+    err = XrdNetUtils::GetAddrs( o.str(), addresses, &ordn, opts );
 
     if( err )
     {
@@ -156,7 +165,7 @@ namespace XrdCl
       return Status( stError, errInvalidAddr );
     }
 
-    if( nAddrs == 0 )
+    if( addresses.size() == 0 )
     {
       log->Error( UtilityMsg, "No addresses for %s were found",
                   o.str().c_str() );
@@ -164,44 +173,10 @@ namespace XrdCl
     }
 
     //--------------------------------------------------------------------------
-    // Check what are the preferences IPv6 or IPv4
-    //--------------------------------------------------------------------------
-    int preferIPv4 = DefaultPreferIPv4;
-    DefaultEnv::GetEnv()->GetInt( "PreferIPv4", preferIPv4 );
-
-    //--------------------------------------------------------------------------
-    // Partition the addresses according to the preferences
-    //
-    // The preferred IP family goes to the back as it is easier to remove
-    // items from the back of the vector
-    //--------------------------------------------------------------------------
-    std::vector<XrdNetAddr> result( nAddrs );
-    auto itr  = result.begin();
-    auto ritr = result.end() - 1;
-
-    for( int i = 0; i < nAddrs; ++i )
-    {
-      bool isIPv4 = addrs[i].isIPType( XrdNetAddrInfo::IPv4 ) ||
-          ( addrs[i].isIPType( XrdNetAddrInfo::IPv6 ) && addrs[i].isMapped() );
-
-      auto store = preferIPv4 ?
-                   ( isIPv4 ? ritr-- : itr++ ) :
-                   ( isIPv4 ? itr++ : ritr-- );
-
-      *store = addrs[i];
-    }
-
-    //--------------------------------------------------------------------------
     // Shuffle each partition
     //--------------------------------------------------------------------------
-    std::random_shuffle( result.begin(), itr );
-    std::random_shuffle( itr, result.end() );
-
-    //--------------------------------------------------------------------------
-    // Return result through output parameter
-    //--------------------------------------------------------------------------
-    addresses.swap( result );
-    delete [] addrs;
+//  std::random_shuffle( addresses.begin(), addresses.begin() + ordn );
+//  std::random_shuffle( addresses.begin() + ordn, result.end() );
 
     return Status();
   }
