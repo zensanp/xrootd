@@ -332,7 +332,7 @@ const char *XrdNetUtils::GetAddrs(std::vector<std::string> &hSVec,
 
 // Process each specification
 //
-   for (int i = 0; i <= (int)hSVec.size(); i++)
+   for (int i = 0; i < (int)hSVec.size(); i++)
        {if (((eText = GetHostPort(aInfo, hSVec[i].c_str(), PortInSpec))
         ||   (eText = GetAInfo(aInfo))) && !force) return eText;
        }
