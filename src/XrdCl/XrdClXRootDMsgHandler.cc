@@ -704,7 +704,7 @@ namespace XrdCl
 
           if( ~uint32_t( rsp->body.redirect.port ) & kXR_ecRedir )
           {
-            if( Utils::CheckEC( rsp->body.redirect.host ) )
+            if( Utils::CheckEC( pRequest, rsp->body.redirect.host ) )
               pRedirectAsAnswer = true;
           }
         }
