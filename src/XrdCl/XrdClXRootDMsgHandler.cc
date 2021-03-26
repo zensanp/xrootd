@@ -453,6 +453,7 @@ namespace XrdCl
     Log *log = DefaultEnv::GetLog();
 
     ServerResponse *rsp = (ServerResponse *)msg->GetBuffer();
+
     ClientRequest  *req = (ClientRequest *)pRequest->GetBuffer();
 
     //--------------------------------------------------------------------------
@@ -700,11 +701,15 @@ namespace XrdCl
           // (the redirect host is to replace the current host)
           //--------------------------------------------------------------------
           if( ~uint32_t( rsp->body.redirect.port ) & kXR_collapseRedir )
-            pPostMaster->CollapseRedirect( pUrl, rsp->body.redirect.host );
+          {
+            std::string url( rsp->body.redirect.host, rsp->hdr.dlen-4 );
+            pPostMaster->CollapseRedirect( pUrl, url );
+          }
 
           if( ~uint32_t( rsp->body.redirect.port ) & kXR_ecRedir )
           {
-            if( Utils::CheckEC( pRequest, rsp->body.redirect.host ) )
+            std::string url( rsp->body.redirect.host, rsp->hdr.dlen-4 );
+            if( Utils::CheckEC( pRequest, url ) )
               pRedirectAsAnswer = true;
           }
         }
