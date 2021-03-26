@@ -38,7 +38,10 @@
 #include "XrdCl/XrdClJobManager.hh"
 #include "XrdCl/XrdClUglyHacks.hh"
 #include "XrdCl/XrdClRedirectorRegistry.hh"
+
+#ifdef WITH_XRDEC
 #include "XrdCl/XrdClEcHandler.hh"
+#endif
 
 #include "XrdOuc/XrdOucCRC.hh"
 
@@ -404,6 +407,7 @@ namespace
           //--------------------------------------------------------------------
           // Handle EC redirect
           //--------------------------------------------------------------------
+#ifdef WITH_XRDEC
           if( status->code == errRedirect )
           {
             std::string ecurl = status->GetErrorMessage();
@@ -415,7 +419,7 @@ namespace
               return;
             }
           }
-
+#endif
         //----------------------------------------------------------------------
         // Notify the state handler and the client and say bye bye
         //----------------------------------------------------------------------
